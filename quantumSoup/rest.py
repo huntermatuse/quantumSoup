@@ -36,9 +36,6 @@ class RestInterface:
         if not self.verifySSL:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        # Remove the call to super().__init__()
-        # super().__init__(**configuration)
-
     @property
     def session(self):
         if not self._session:
