@@ -177,6 +177,32 @@ class CanaryView(LiveDataTokenManagement, UserTokenManagement):
                         tagData[tagPath].extend([Tvq(*value) for value in values])
 
             return ((tagPath, tagData.get(tagPath, [])) for tagPath in tags)
+        
+    def getTagContext(self, tags: List[str], timezone: str = None) -> List[Dict[str, Any]]:
+        """
+        Get context for requested tags including both the oldest and latest timestamps.
+
+        Args:
+            tags (List[str]): Array of tags to request context from.
+            timezone (str, optional): Used to convert timestamps to specified time zone and parse relative date/time values.
+                                      Not applicable when using a user token. If not set, timestamps will be returned using
+                                      the Views server's local time with a UTC offset.
+
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries containing tag context information.
+
+        Raises:
+            RuntimeError: If the API call fails.
+        """
+        jsonData = {
+            "userToken": self.userToken,
+            "tags": self._coerceToList(tags)
+        }
+        if timezone:
+            jsonData["timezone"] = timezone
+
+        response = self._singlePost("getTagContext", jsonData, "data")
+        return response
 
     def getLiveData(self, tags=None, **configuration):
         """Returns the live data for the given tag(s). Each subsequent call returns new data.
