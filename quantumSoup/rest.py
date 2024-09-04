@@ -3,8 +3,6 @@ import urllib3
 
 # For JSON payload packaging, import these for easier/auto serializing
 from datetime import datetime, date
-import arrow
-
 
 VALIDATE_SSL_CERTS = False
 
@@ -47,7 +45,7 @@ class RestInterface:
         """JSON serializes directly or not at all.
         Dates are easy though.
         """
-        if isinstance(thing, (datetime, date, arrow.Arrow)):
+        if isinstance(thing, (datetime, date)):
             return thing.isoformat()
         # Simply return it and hope the error gets to someone who can coerce it better
         return thing

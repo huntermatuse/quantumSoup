@@ -1,9 +1,4 @@
-import ciso8601, arrow
-from datetime import datetime
-
-
-UNIX_EPOCH = arrow.get("1970-01-01T00:00:00Z")
-
+from datetime import datetime, timezone
 
 class BaseValue(object):
 
@@ -29,7 +24,7 @@ class BaseValue(object):
             return tuple(
                 (
                     value.isoformat()
-                    if isinstance(value, (datetime, arrow.Arrow))
+                    if isinstance(value, datetime)
                     else value
                 )
                 for value, optional in zip(self._tuple, self._optional)
@@ -72,31 +67,29 @@ class BaseValue(object):
                 return None
 
             if self._timeFormat:
-                return arrow.get(timestamp, self._arrowTimeFormat)
+                return datetime.strptime(timestamp, self._timeFormat)
 
             try:  # the iso8601 format first
-                return arrow.Arrow.fromdatetime(ciso8601.parse_datetime(timestamp))
+                return datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
             except ValueError:
                 raise ValueError(
-                    '%r attempted to parse "%s" without a time format'
-                    % (self, timestamp)
+                    f'{self!r} attempted to parse "{timestamp}" without a time format'
                 )
 
         # if it's already a datetime converto to this more convenient class
         elif isinstance(timestamp, datetime):
-            return arrow.Arrow.fromdatetime(timestamp)
+            return timestamp
 
         # if it's a tuple (like what would be used ot initialize a datetime), then init
         elif isinstance(timestamp, (tuple, list)):
-            return arrow.Arrow(*timestamp)
+            return datetime(*timestamp)
 
         else:
             try:  # see if arrow can convert it anyhow (like ms since epoch...)
-                return arrow.get(timestamp)
+                return datetime.fromtimestamp(float(timestamp), tz=timezone.utc)
             except ValueError:
                 raise ValueError(
-                    '%r attempted to parse "%s" without a time format'
-                    % (self, timestamp)
+                    f'{self!r} attempted to parse "{timestamp}" without a time format'
                 )
 
 
